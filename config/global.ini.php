@@ -62,7 +62,7 @@ host = localhost
 username = "@USERNAME@"
 password =
 dbname = matomo_tests
-tables_prefix = matomotests_
+tables_prefix =
 port = 3306
 adapter = PDO\MYSQL
 type = InnoDB
@@ -488,11 +488,10 @@ datatable_archiving_maximum_rows_subtable_referrers = 50
 ; maximum number of rows for the Users report
 datatable_archiving_maximum_rows_userid_users = 50000
 
-; maximum number of rows for the Custom Variables names report
-; Note: if the website is Ecommerce enabled, the two values below will be automatically set to 50000
-datatable_archiving_maximum_rows_custom_variables = 1000
-; maximum number of rows for the Custom Variables values reports
-datatable_archiving_maximum_rows_subtable_custom_variables = 1000
+; maximum number of rows for the Custom Dimensions report
+datatable_archiving_maximum_rows_custom_dimensions = 1000
+; maximum number of rows for the Custom Dimensions subtable reports
+datatable_archiving_maximum_rows_subtable_custom_dimensions = 1000
 
 ; maximum number of rows for any of the Actions tables (pages, downloads, outlinks)
 datatable_archiving_maximum_rows_actions = 500
@@ -742,11 +741,15 @@ custom_cacert_pem=
 ; Default is 1.
 enable_tracking_failures_notification = 1
 
+; Controls how many months in the past reports are re-archived for plugins that support
+; doing this (such as CustomReports). Set to 0 to disable the feature. Default is 6.
+rearchive_reports_in_past_last_n_months = last6
+
 [Tracker]
 
 ; When enabled and a userId is set, then the visitorId will be automatically set based on the userId. This allows to
-; identify the same user as the same visitor across devices. 
-; Disabling this feature can be useful for example when using the third party cookie, where all Matomo tracked sites 
+; identify the same user as the same visitor across devices.
+; Disabling this feature can be useful for example when using the third party cookie, where all Matomo tracked sites
 ; use the same "global" visitorId for a device and you want to see when the same user switches between devices.
 enable_userid_overwrites_visitorid = 1
 
@@ -899,6 +902,17 @@ enable_spam_filter = 1
 ; variable "innodb_rollback_on_timeout" is turned off. Only configure if really needed. The lower the value the more tracking
 ; requests may be discarded due to too low lock wait time.
 innodb_lock_wait_timeout = 0
+
+; Allows you to exclude specific requests from being tracked. The definition is similar to segments.
+; The following operands are supported: Equals: `==`, Not equals: `!=`, Contains: `=@`, Not Contains: `!@`, Starts with: `=^`, Ends with: `=$`.
+; The structure is as following: {tracking parameter}{operand}{value to match}.
+; For example "e_c==Media" means that all tracking requests will be excluded where the event category is Media.
+; Multiple exclusions can be configured separated by a comma. The request will be excluded if any expressions matches (not all of them). For example: "e_c==Media,action_name=@privacy".
+; This would also exclude any request from being tracked where the page title contains privacy.
+; All comparisons are performed case insensitve. The value to match on the right side should be URL encoded.
+; For example: "action_name=^foo%2Cbar" would exclude page titles that start with "foo,bar".
+; For a list of tracking parameters you can use on the left side view https://developer.matomo.org/api-reference/tracking-api
+exclude_requests = ""
 
 [Segments]
 ; Reports with segmentation in API requests are processed in real time.

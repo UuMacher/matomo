@@ -15,6 +15,8 @@ The Product Changelog at **[matomo.org/changelog](https://matomo.org/changelog)*
 * The JS tracker event `PiwikInitialized` has been renamed to `MatomoInitialized`
 * Support for tracking and reporting of these browser plugins has been discontinued: Gears, Director
 * Plugins that extend the JS tracker should now add their callback to `matomoPluginAsyncInit` instead of `piwikPluginAsyncInit`
+* The visitor ID cookie now contains less data (due to the _idvc, _idts, _viewts and _ects tracking parameters no longer being used). This is a breaking change if you use the Matomo PHP Tracker and forward the visitor cookie to it, and you will need to upgrade the PHP tracker to use with Matomo 4.
+* The tracker method `setVisitStandardLength` has been removed as there is no need for it anymore.
 
 #### Deprecations in Matomo JS tracker
 
@@ -36,7 +38,7 @@ These are only recommendations (because we will keep backward compatibility for 
 #### Breaking changes in HTTP API 
 
 ##### Format changes
-* The `JSON2` API format has now been deprecated and is now applied  by default. The JSON2 renderer will be removed in Matomo 5 and we recommend switching to it. 
+* The `JSON2` API format has now been deprecated and is now applied  by default. The JSON2 renderer will be removed in Matomo 5 and we recommend switching to the `JSON` renderer. 
 * The `JSON` renderer now behaves like the previous `JSON2` renderer did. This means arrays like `['a' => 0, 'b' => 1]` will be rendered in JSON as `{"a":0,"b":1}` instead of `[{"a":0,"b":1}]`. This impacts these API methods:
   * API.getSettings
   * Annotations.get
@@ -69,6 +71,7 @@ These are only recommendations (because we will keep backward compatibility for 
 
 * The event `CustomPiwikJs.piwikJsChanged` has been renamed to `CustomJsTracker.trackerJsChanged`
 * The event `CustomPiwikJs.shouldAddTrackerFile` has been renamed to `CustomJsTracker.shouldAddTrackerFile`
+* The event `CustomMatomoJs.shouldAddTrackerFile` has been renamed to `CustomJsTracker.manipulateJsTracker`
 * The event `Live.getAllVisitorDetails` has been removed. Use a `VisitorDetails` class instead (see Live plugin).
 * The event `Live.getExtraVisitorDetails'` has been removed. Use the `VisitorDetails` class within each plugin instead.
 * The event `Piwik.getJavascriptCode` has been renamed to `Tracker.getJavascriptCode`.
@@ -123,9 +126,11 @@ These are only recommendations (because we will keep backward compatibility for 
 #### New APIs
 * A new API `UsersManager.createAppSpecificTokenAuth` has been added to create an app specific token for a user.
 * A new JS tracker method `getMatomoUrl` has been added which replaces `getPiwikUrl`.
+* Reporting API: It is now possible to apply `hideColumns` recursively to nested values by setting `hideColumnsRecursively=1`. For all `Live` api methods this is the default behaviour.
 
 ### Other Breaking changes
 
+* When embedding reports (widgets) into a different site, it is no longer possible to use authentication tokens of users with at least write access 
 * The log importer in `misc/log-analytics` now supports Python 3 (3.5, 3.6, 3.7 or 3.8), it will no longer run with Python 2. If you have any automated scripts that run the importer, you will have to change them to use the Python 3 executable instead.
 * Matomo now uses the SERVER_NAME for host validation and no longer the HOST header. If you're running Matomo behind a load balancer or a proxy you need to ensure that SERVER_NAME is set correctly.
 * Deprecated `piwik` font was removed. Use `matomo` font instead
@@ -140,6 +145,23 @@ These are only recommendations (because we will keep backward compatibility for 
 * The following dimensions have been removed and replaced with versions that measure seconds: visitor_days_since_first, visitor_days_since_last, visitor_days_since_order
 * The _idvc, _idts, _viewts and _ects tracker parameters are no longer used, the values are calculated server side.
   Note: tracking these values server side means replaying log data in the past will result in inaccurate values for these dimensions.
+* The Dependency Injection library PHP-DI was updated. [Some definitions need to be updated]((https://php-di.org/doc/migration/6.0.html)):
+  * The Method `\DI\object()` has been removed. You can use `\DI\autowire()` or `\DI\create()` instead.
+  * The Method `\DI\link()` has been removed. Use `\DI\get()` instead.
+  * Defining global observer functions in config now requires the functions to be wrapped in `\DI\value()`, unless they are a factory.
+
+## Matomo 3.14.0
+
+### New API
+
+The following new JavaScript tracker methods have been added:
+
+* `_paq.push(['setVisitorId', visitorId]);`. This can be used to force a specific visitorId. It takes a 16 digit hexadecimal string.
+* `_paq.push(['requireCookieConsent']);`. Call this method if cookies should be only used when consent was given.
+* `_paq.push(['rememberCookieConsentGiven']);`. Call this method when a user gives you cookie consent.
+* `_paq.push(['forgetCookieConsentGiven']);`. Call this method when a user revokes cookie consent.
+* `_paq.push(['setCookieConsentGiven']);`. Call this method to let the tracker know consent was given for the current page view (won't be remembered across requests).
+* For more info on consent have a look at https://developer.matomo.org/guides/tracking-javascript-guide#asking-for-consent
 
 ## Matomo 3.13.6
 
