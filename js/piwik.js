@@ -6791,9 +6791,9 @@ if (typeof window.Piwik !== 'object') {
              * @param bool
              */
             this.setSecureCookie = function (enable) {
-				if(location.protocol !== 'https:') {
-					logConsoleError("Error in setSecureCookie: You cannot use `Secure` on http.");
-				}
+                if(location.protocol !== 'https:') {
+                    logConsoleError("Error in setSecureCookie: You cannot use `Secure` on http.");
+                }
                 configCookieIsSecure = enable;
             };
 
@@ -6801,17 +6801,17 @@ if (typeof window.Piwik !== 'object') {
              * Set the SameSite attribute for cookies to a custom value.
              * You might want to use this if your site is running in an iframe since
              * then it will only be able to access the cookies if SameSite is set to 'None'.
-			 * Sets to Lax if invalid parameter is passed, sets CookieIsSecure to true on None.
+             * Sets to Lax if invalid parameter is passed, sets CookieIsSecure to true on None.
              *
              * @param string either Lax, None or Strict
              */
             this.setCookieSameSite = function (sameSite) {
-				if (sameSite != 'None' && sameSite != 'Lax' && sameSite != 'Strict') {
-					sameSite = 'Lax';
-				}
-				if (sameSite == 'None') {
-					this.setSecureCookie(true);
-				}
+                if (sameSite != 'None' && sameSite != 'Lax' && sameSite != 'Strict') {
+                    sameSite = 'Lax';
+                }
+                if (sameSite == 'None') {
+                    this.setSecureCookie(true);
+                }
                 configCookieSameSite = sameSite;
             };
 
